@@ -3,6 +3,9 @@ import socket
 import sys
 from thread import *
 
+# config = open(config.txt)
+
+
 HOST = ''	# Symbolic name meaning all available interfaces
 
 try:
@@ -26,6 +29,29 @@ print 'Socket bind complete'
 s.listen(10)
 print 'Socket now listening'
 
+
+players = []
+scores = {}
+
+def gameLogic():
+	while 1:
+		command = input("Enter command: ")
+        	if command == "exit":
+                	print "exit!"
+			break
+        	elif command == "startgame":
+                	gameLength = input("How long should this game last? (min) ")
+                	startGame(gameLength)
+                	endGame()
+
+
+def startGame(gameLength):
+	print "gamestarted!"
+	time.sleep(gameLength)
+
+def endGame():
+	print "endgame!"
+
 #Function for handling connections. This will be used to create threads
 def clientthread(conn, username):
 	#Sending message to connected client
@@ -40,12 +66,17 @@ def clientthread(conn, username):
 			break
                 data = data.rstrip()
 		print username+': '+data
+		print players
+		print scores
                 conn.sendall('got it!')
 
 	#came out of loop
 	conn.close()
 
 #now keep talking with the client
+
+start_new_thread(gameLogic, ())
+
 while 1:
     #wait to accept a connection - blocking call
 	conn, addr = s.accept()
@@ -55,7 +86,11 @@ while 1:
                 print('Username not recieved')
                 break
         username = username.rstrip()
+	players.append(username)
+	scores[username] = 0
 	print 'Connected with ' + addr[0] + ':' + str(addr[1])+' as '+username
+
+
 
 	#start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function.
 	start_new_thread(clientthread ,(conn, username))
