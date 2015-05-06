@@ -1,6 +1,5 @@
 #!/usr/bin/python
-import socket
-import sys
+import socket, sys, time
 from thread import *
 
 # config = open(config.txt)
@@ -35,19 +34,21 @@ scores = {}
 
 def gameLogic():
 	while 1:
+		print "1. exit\n2. start game"
 		command = input("Enter command: ")
-        	if command == "exit":
+        	if int(command) == 1:
                 	print "exit!"
 			break
-        	elif command == "startgame":
+        	elif int(command) == 2:
                 	gameLength = input("How long should this game last? (min) ")
-                	startGame(gameLength)
-                	endGame()
+                	print time.time()
+			start_new_thread(startGame, (gameLength,))
 
 
 def startGame(gameLength):
 	print "gamestarted!"
 	time.sleep(gameLength)
+	endGame()
 
 def endGame():
 	print "endgame!"
