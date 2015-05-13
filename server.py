@@ -44,7 +44,6 @@ def gameLogic():
                 	print time.time()
 			start_new_thread(startGame, (gameLength,))
 
-
 def startGame(gameLength):
 	print "gamestarted!"
 	time.sleep(gameLength)
@@ -69,6 +68,7 @@ def clientthread(conn, username):
 		print username+': '+data
 		print players
 		print scores
+		clientVaraibles = data.split(",") #client variables = splitted data
                 conn.sendall('got it!')
 
 	#came out of loop
