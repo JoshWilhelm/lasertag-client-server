@@ -28,22 +28,23 @@ print 'Socket bind complete'
 s.listen(10)
 print 'Socket now listening'
 
-
-players = []
-scores = {}
+stats = {}
+team1 = {}
+team2 = {}
 
 def gameLogic():
 	while 1:
-		print "1. exit\n2. start game"
+		print "1. quit\n2. start game"
 		command = input("Enter command: ")
         	if int(command) == 1:
-                	print "exit!"
+                	print "quit!"
 			break
         	elif int(command) == 2:
-                	gameLength = input("How long should this game last? (min) ")
+                	gameLength = int(input("How long should this game last? (min) "))
                 	print time.time()
 			start_new_thread(startGame, (gameLength,))
-
+			#maxshots = input("How many shots are allowed per player per game? ")
+maxshots = 5
 def startGame(gameLength):
 	print "gamestarted!"
 	time.sleep(gameLength)
@@ -66,10 +67,27 @@ def clientthread(conn, username):
 			break
                 data = data.rstrip()
 		print username+': '+data
-		print players
-		print scores
-		clientVaraibles = data.split(",") #client variables = splitted data
-                conn.sendall('got it!')
+		clientVariables = data.split(",") #client variables = splitted data
+		if clientVariables[0] == "shot":
+		    if username in team1:
+			if len(team1[username]["shots"]) <= maxshots:
+		    		team1[username]["shots"].append(clientVariables[1])    
+		    else:
+			if len(team2[username]["shot"]) <= maxshots:
+				team2[username]["shots"].append(clientVariables[1])
+		if clientVariables[0] == "hit":
+		    if int(username)%2 == 1:	#if odd then
+			if int(clientVariables[2])%2 != int(username)%2:
+		    		team1[username]["hits"].append([clientVariables[1],clientVariables[2]])
+		    else:
+			if int(clientVariable[2])%2 != int(username)%2:
+		    		team2[username]["hits"].append([clientVariables[1],clientVariables[2]])
+		print team1
+		print team2
+		if clientVariables[0] == "no game":
+		    print "no game"
+		conn.sendall('got it!')
+
 
 	#came out of loop
 	conn.close()
@@ -87,8 +105,11 @@ while 1:
                 print('Username not recieved')
                 break
         username = username.rstrip()
-	players.append(username)
-	scores[username] = 0
+	stats[username] = {"shots":[],"hits":[]}
+	if int(username)%2 == 1:
+	    team1[username] = {"shots":[], "hits":[]}
+	else:
+	    team2[username] = {"shots":[], "hits":[]}
 	print 'Connected with ' + addr[0] + ':' + str(addr[1])+' as '+username
 
 
