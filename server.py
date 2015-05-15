@@ -54,31 +54,31 @@ def startGame(gameLength, maxShots, shotFrequency):
 	global gameVariable
 	gameVariable = True
 	print "game started!"
-	time.sleep(gameLength) #NOTE: Multiply by 60 later (convert to min)
+	time.sleep(gameLength*60) #NOTE: Multiply by 60 later (convert to min)
 	endGame()
 
 def gameLogic():
-	while 1:
+	while True:
 		print "1. quit\n2. start game\n3. schedule game"
 		command = input("Enter command: \n")
         	if int(command) == 1:
                 	print "quit!"
-			break
+			return
         	elif int(command) == 2:
                 	gameLength = int(input("How long should this game last? (min) "))
 			global maxShots
 			maxShots = int(input("How many shots are allowed per player per game? "))
 			global shotFrequency
-			shotFrequency = int(input("How many shots are allowed per second? "))
+			shotFrequency = int(input("How often are shots allowed? (in seconds) "))
 			start_new_thread(startGame, (gameLength, maxShots, shotFrequency))
 		elif int(command) == 3:
 			gameStart = int(input("How long until next game starts? (min) "))
 			gameStart *= 60
-			global gameStartTime 
+			global gameStartTime
 			gameStartTime= gameStart + time.time()
 			gameLength = int(input("How long should this game last? (min) "))
 			maxShots = int(input("How many shots are allowed per player per game? "))
-			shotFrequency = int(input("How many shots are allowed per second? "))
+			shotFrequency = int(input("How often are shots allowed? (in seconds) "))
 			start_new_thread(scheduleGame, (gameStart, gameLength, gameStartTime, maxShots, shotFrequency))
 		else:
 		    print "You fail... Try 1-3."
@@ -109,13 +109,12 @@ def clientthread(conn, username):
 			#	conn.sendall("No game in progress.")
 			break
 		data = data.rstrip()
-		print username+': '+data
+		# print username+': '+data
 		clientVariables = data.split(",") #client variables = splitted data
 		if clientVariables[0] == "shot":
-		   
 		    if username in team1:
-			if len(team1[username]["shots"]) < maxShots: 
-			    if len(team1[username]["shots"]) == 0: 
+			if len(team1[username]["shots"]) < maxShots:
+			    if len(team1[username]["shots"]) == 0:
 				team1[username]["shots"].append(toEpoch(clientVariables[1]))
 			    else:
 				if int(toEpoch(clientVariables[1])) - int(team1[username]["shots"][-1]) >= shotFrequency:
@@ -123,7 +122,7 @@ def clientthread(conn, username):
 			else:
 			    break
 		    else:
-			if len(team2[username]["shot"]) < maxShots:
+			if len(team2[username]["shots"]) < maxShots:
 			    if len(team2[username]["shots"]) == 0:
 				team2[username]["shots"].append(toEpoch(clientVariables[1]))
 			    else:
@@ -138,28 +137,28 @@ def clientthread(conn, username):
 		    else:
 			if int(clientVariables[2])%2 != int(username)%2:
 		    		team2[username]["hits"].append([toEpoch(clientVariables[1]),clientVariables[2]])
-		# print clientVariables[1] - team1[username]["shots"][-1]  
+		# print clientVariables[1] - team1[username]["shots"][-1]
 		# print shotFrequency
- 		# print clientVariables[1] - team2[username]["shots"][-1]  
+ 		# print clientVariables[1] - team2[username]["shots"][-1]
 		# print shotFrequency
 
-		print team1
-		print team2
+		# print team1
+		# print team2
 		print "Team 1 Stats: "
 		for playerID in team1:
-			print "Gun ",playerID,":" 
-			print "     Shot count = ", len(team1[playerID]["shots"]) 
-			print "     Hit count = ", len(team1[playerID]["hits"])
+			print "     Gun ",playerID,":"
+			print "          Shot count = ", len(team1[playerID]["shots"])
+			print "          Hit count = ", len(team1[playerID]["hits"])
 		print "Team 2 Stats: "
 		for playerID2 in team2:
-			print "Gun ",playerID2,":" 
-			print "     Shot count = ", len(team2[playerID2]["shots"])
-			print "     Hit count = ", len(team2[playerID2]["hits"])
+			print "     Gun ",playerID2,":"
+			print "          Shot count = ", len(team2[playerID2]["shots"])
+			print "          Hit count = ", len(team2[playerID2]["hits"]), "\n\n\n"
 		print
-		
-		if clientVariables[0] == "error":
-		    	print "error"
-			conn.sendall('got it!')
+
+		# if clientVariables[0] == "error":
+		#     	print "error"
+		# 	conn.sendall('got it!')
 
 
 	#came out of loop
@@ -169,7 +168,7 @@ def clientthread(conn, username):
 
 start_new_thread(gameLogic, ()) #comma cause tuple
 
-while 1:
+while True:
     #wait to accept a connection - blocking call
 	conn, addr = s.accept()
 	#Get username from client
@@ -184,6 +183,7 @@ while 1:
 	else:
 	    team2[username] = {"shots":[], "hits":[]}
 	print 'Connected with ' + addr[0] + ':' + str(addr[1])+' as '+username
+        print "1. quit\n2. start game\n3. schedule game\nEnter Command: "
 
 
 
